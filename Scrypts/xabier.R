@@ -1,0 +1,8 @@
+df<-read.csv("C:/Users/gamak/Downloads/pib_exogenas_usa.csv",sep = ";")
+sum(is.na(datos$ContinentCode))
+library(naniar)
+vis_miss(datos)
+df <- subset(df, select = -ContinentCode)
+df2<-read.csv("C:/Users/gamak/Downloads/ipc_usa.csv")
+library(naniar)
+vis_miss(df2)
