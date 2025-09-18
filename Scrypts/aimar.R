@@ -27,8 +27,8 @@ dim(ipc)
 colnames(ipc)
 str(ipc)
 ipc = ipc %>% select(-DATE)
-ipc = ts(data = ipc, start = 1970, frequency = 12)
-autoplot(ipc)
+IPC = ts(data = ipc, start = 1970, frequency = 12)
+autoplot(IPC)
 
 #PIB
 dim(pib)
@@ -39,4 +39,11 @@ unique(pib$Code); pib = pib %>% select(-Code)
 unique(pib$ContinentCode); pib = pib %>% select(-ContinentCode)
 unique(pib$Year); pib = pib %>% select(-Year)
 unique(pib$Month); pib = pib %>% select(-Month)
-pib = ts(data = pib, start = 1970, frequency = 12)
+PIB = pib[,1]
+PIB = na.omit(PIB)
+PIB = ts(data = PIB, start = 1970, frequency = 4)
+autoplot(PIB)
+
+#RESTO
+rest = pib[,-1]
+REST = ts(data = rest, start = 1970, frequency = 12)
