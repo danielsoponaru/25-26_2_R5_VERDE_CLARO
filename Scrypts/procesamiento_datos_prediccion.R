@@ -90,8 +90,6 @@ outliers_SMI <- tsclean(SMI_ts)
 par(mfrow=c(2,2))
 ts.plot(GDP_ts, outliers_GDP, col=c("black","red"), lty=c(1,2),
         main="GDP: Original vs Ajustada (tsclean)")
-legend("topleft", legend=c("Original","Ajustada"), col=c("black","red"), lty=1:2)
-
 ts.plot(MS_ts, outliers_MS, col=c("black","red"), lty=c(1,2),
         main="MS: Original vs Ajustada (tsclean)")
 ts.plot(UR_ts, outliers_UR, col=c("black","red"), lty=c(1,2),
@@ -140,7 +138,7 @@ boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
 ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_MS <- diff(boxcox_MS, lag = 2)
+diff_boxcox_MS <- diff(boxcox_MS, lag = 1)
 ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
 
 # --- DESCOMPOSICIÓN ---
@@ -190,7 +188,6 @@ ggtsdisplay(diff_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
 # --- DESCOMPOSICIÓN ---
 decomp_SMI <- decompose(diff_boxcox_SMI, type = "additive")
 plot(decomp_SMI, col = "blue")
-
 
 
 # ==========================================
