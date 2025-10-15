@@ -11,6 +11,7 @@ library(forecast)
 library(tseries)
 library(tsoutliers)
 library(visdat)
+library(stats)
 library(ggplot2)
 
 
@@ -47,7 +48,7 @@ df <- df %>%
 
 df_quarterly <- df %>%
   filter(Month %in% c(3, 6, 9, 12)) %>%
-  filter(Year %in% 1970:2021) %>% #He filtrado hasta 2021 que es donde tenemos los valores faltantes
+  filter(Year %in% 2010:2021) %>% #He filtrado desde 2010 hasta 2021 que es donde tenemos los valores faltantes
   group_by(Year, Quarter) %>%
   summarise(
     GDP = first(na.omit(GDP)),
@@ -58,12 +59,14 @@ df_quarterly <- df %>%
   ungroup() %>%
   arrange(Year, Quarter)
 
+
 vis_miss(df_quarterly)
 
-# Crear columna de fecha representando el inicio del trimestre
 df_quarterly$Date <- as.Date(paste(df_quarterly$Year, (df_quarterly$Quarter - 1) * 3 + 1, "01", sep = "-"))
 
-# Visualizar primeras filas
+df_quarterly <- df_quarterly %>%
+  filter(Date >= as.Date("2010-07-01") & Date <= as.Date("2021-06-30"))
+
 head(df_quarterly)
 
 # ============================
@@ -138,7 +141,7 @@ boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
 ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_MS <- diff(boxcox_MS, lag = 1)
+diff_boxcox_MS <- diff(diff(diff((boxcox_MS))))
 ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
 
 # --- DESCOMPOSICIÓN ---
@@ -160,7 +163,7 @@ boxcox_UR <- BoxCox(outliers_UR, lambda_UR)
 ggtsdisplay(boxcox_UR, main = "UR - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_UR <- diff(boxcox_UR, lag = 1)
+diff_boxcox_UR <- diff(diff(boxcox_UR))
 ggtsdisplay(diff_boxcox_UR, main = "UR - Diferenciada (lag=1)")
 
 # --- DESCOMPOSICIÓN ---
@@ -195,16 +198,12 @@ plot(decomp_SMI, col = "blue")
 # ==========================================
 
 comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
-  library(tseries)
-  library(stats)
   
-  cat("==========================================\n")
-  cat("Resultados para:", nombre_serie, "\n")
-  cat("==========================================\n")
-  
+  cat("Resultados para:", nombre_serie)
+
   # ADF Test
   adf <- adf.test(serie)
-  cat("ADF test p-value:", round(adf$p.value, 4), "\n")
+  cat("ADF test p-value:", round(adf$p.value, 4))
   if (adf$p.value < 0.05) {
     cat(" → Serie estacionaria según ADF ✅\n")
   } else {
@@ -213,7 +212,7 @@ comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
   
   # KPSS Test
   kpss <- kpss.test(serie, null = "Level")
-  cat("KPSS test p-value:", round(kpss$p.value, 4), "\n")
+  cat("KPSS test p-value:", round(kpss$p.value, 4))
   if (kpss$p.value > 0.05) {
     cat(" → Serie estacionaria según KPSS ✅\n")
   } else {
@@ -222,7 +221,7 @@ comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
   
   # Ljung-Box Test (ruido blanco)
   ljung <- Box.test(serie, lag = 10, type = "Ljung-Box")
-  cat("Ljung-Box test p-value:", round(ljung$p.value, 4), "\n")
+  cat("Ljung-Box test p-value:", round(ljung$p.value, 4))
   if (ljung$p.value > 0.05) {
     cat(" → Residuos sin autocorrelación (ruido blanco) ✅\n")
   } else {
@@ -240,6 +239,7 @@ comprobacion_tratamiento(diff_boxcox_GDP, "GDP")
 comprobacion_tratamiento(diff_boxcox_MS, "MS")
 comprobacion_tratamiento(diff_boxcox_SMI, "SMI")
 comprobacion_tratamiento(diff_boxcox_UR, "UR")
+
 
 
 
