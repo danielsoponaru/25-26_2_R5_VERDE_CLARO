@@ -120,7 +120,7 @@ ggtsdisplay(boxcox_GDP, main = "GDP - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
 diff_boxcox_GDP <- diff(boxcox_GDP, lag = 1)
-ggtsdisplay(diff_boxcox_GDP, main = "GDP - Diferenciada (lag=1)")
+ggtsdisplay(diff_boxcox_GDP, main = "GDP - Doble diferencia con estacionalidad")
 
 # --- DESCOMPOSICIÓN ---
 decomp_GDP <- decompose(diff_boxcox_GDP, type = "additive")
@@ -141,7 +141,7 @@ boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
 ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_MS <- diff(diff(diff((boxcox_MS))))
+diff_boxcox_MS <- diff(diff(diff(boxcox_MS), lag = 4))
 ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
 
 # --- DESCOMPOSICIÓN ---
@@ -163,7 +163,7 @@ boxcox_UR <- BoxCox(outliers_UR, lambda_UR)
 ggtsdisplay(boxcox_UR, main = "UR - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_UR <- diff(diff(boxcox_UR))
+diff_boxcox_UR <- diff(diff(boxcox_UR), lag = 2)
 ggtsdisplay(diff_boxcox_UR, main = "UR - Diferenciada (lag=1)")
 
 # --- DESCOMPOSICIÓN ---
@@ -235,11 +235,10 @@ comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
 # Aplicar a todas las series
 # ==========================================
 
-comprobacion_tratamiento(diff_boxcox_GDP, "GDP")
-comprobacion_tratamiento(diff_boxcox_MS, "MS")
-comprobacion_tratamiento(diff_boxcox_SMI, "SMI")
-comprobacion_tratamiento(diff_boxcox_UR, "UR")
-
+comprobacion_tratamiento(diff_boxcox_GDP, "GDP") #ADF no me da por mucho, 0.3707
+comprobacion_tratamiento(diff_boxcox_MS, "MS") #Esta ok
+comprobacion_tratamiento(diff_boxcox_UR, "UR") # ADF no me da por bastante, 0.1443
+comprobacion_tratamiento(diff_boxcox_SMI, "SMI") # Esta ok aunque se pasa un poco en ADF 0.089
 
 
 
