@@ -11,6 +11,7 @@ library(forecast)
 library(tseries)
 library(tsoutliers)
 library(visdat)
+library(stats)
 library(ggplot2)
 
 
@@ -47,7 +48,7 @@ df <- df %>%
 
 df_quarterly <- df %>%
   filter(Month %in% c(3, 6, 9, 12)) %>%
-  filter(Year %in% 1970:2021) %>% #He filtrado hasta 2021 que es donde tenemos los valores faltantes
+  filter(Year %in% 2010:2021) %>% #He filtrado desde 2010 hasta 2021 que es donde tenemos los valores faltantes
   group_by(Year, Quarter) %>%
   summarise(
     GDP = first(na.omit(GDP)),
@@ -58,12 +59,14 @@ df_quarterly <- df %>%
   ungroup() %>%
   arrange(Year, Quarter)
 
+
 vis_miss(df_quarterly)
 
-# Crear columna de fecha representando el inicio del trimestre
 df_quarterly$Date <- as.Date(paste(df_quarterly$Year, (df_quarterly$Quarter - 1) * 3 + 1, "01", sep = "-"))
 
-# Visualizar primeras filas
+df_quarterly <- df_quarterly %>%
+  filter(Date >= as.Date("2010-07-01") & Date <= as.Date("2021-06-30"))
+
 head(df_quarterly)
 
 # ============================
@@ -102,9 +105,49 @@ par(mfrow=c(1,1))
 # 5. Control de varianza, estacionalidad y tendencia
 # ============================
 
+# ==========================================
+# Función de comprobación de estacionariedad
+# ==========================================
+
+comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
+  
+  cat("Resultados para:", nombre_serie)
+  
+  # ADF Test
+  adf <- adf.test(serie)
+  cat("ADF test p-value:", round(adf$p.value, 4))
+  if (adf$p.value < 0.05) {
+    cat(" → Serie estacionaria según ADF ✅\n")
+  } else {
+    cat(" → Serie NO estacionaria según ADF ❌\n")
+  }
+  
+  # KPSS Test
+  kpss <- kpss.test(serie, null = "Level")
+  cat("KPSS test p-value:", round(kpss$p.value, 4))
+  if (kpss$p.value > 0.05) {
+    cat(" → Serie estacionaria según KPSS ✅\n")
+  } else {
+    cat(" → Serie NO estacionaria según KPSS ❌\n")
+  }
+  
+  # Ljung-Box Test (ruido blanco)
+  ljung <- Box.test(serie, lag = 10, type = "Ljung-Box")
+  cat("Ljung-Box test p-value:", round(ljung$p.value, 4))
+  if (ljung$p.value > 0.05) {
+    cat(" → Residuos sin autocorrelación (ruido blanco) ✅\n")
+  } else {
+    cat(" → Residuos autocorrelacionados ❌\n")
+  }
+  
+  cat("\n")
+}
+
 # ============================================================
 # GDP
 # ============================================================
+# GDP_BASE <- outliers_GDP
+#outliers_GDP <- window(GDP_BASE, start = c(2010, 1))
 
 # --- VARIANZA ---
 ggtsdisplay(outliers_GDP, main = "GDP - Serie original")
@@ -115,14 +158,23 @@ cat("Lambda GDP:", lambda_GDP)
 boxcox_GDP <- BoxCox(outliers_GDP, lambda_GDP)
 ggtsdisplay(boxcox_GDP, main = "GDP - Tras BoxCox")
 
-# --- ESTACIONALIDAD ---
-diff_boxcox_GDP <- diff(boxcox_GDP, lag = 1)
-ggtsdisplay(diff_boxcox_GDP, main = "GDP - Diferenciada (lag=1)")
+# # --- TENDENCIA ---
+# diff_boxcox_GDP <- diff(boxcox_GDP)
+# ggtsdisplay(diff_boxcox_GDP, main = "GDP - Doble diferencia con estacionalidad")
+# comprobacion_tratamiento(diff_boxcox_GDP, "GDP")
 
-# --- DESCOMPOSICIÓN ---
-decomp_GDP <- decompose(diff_boxcox_GDP, type = "additive")
-plot(decomp_GDP, col = "blue")
 
+# TENDENCIA DECOMPOSE
+tendencia_GDP <- decompose(boxcox_GDP, type = "additive")$trend
+tend_boxcox_GDP <- na.omit(boxcox_GDP-tendencia_GDP)
+ggtsdisplay(tend_boxcox_GDP)
+
+# ESTACIONALIDAD
+est_tend_boxcox_GDP <- diff(tend_boxcox_GDP, lag = 3)
+ggtsdisplay(est_tend_boxcox_GDP)
+
+# Estacionaria?
+comprobacion_tratamiento(est_tend_boxcox_GDP, "GDP") #Esta ok
 
 # ============================================================
 # MS
@@ -138,12 +190,11 @@ boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
 ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
 
 # --- ESTACIONALIDAD ---
-diff_boxcox_MS <- diff(boxcox_MS, lag = 1)
+diff_boxcox_MS <- diff(diff(diff(boxcox_MS)), lag = 4)
 ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
 
-# --- DESCOMPOSICIÓN ---
-decomp_MS <- decompose(diff_boxcox_MS, type = "additive")
-plot(decomp_MS, col = "blue")
+
+comprobacion_tratamiento(diff_boxcox_MS, "MS") #Esta ok
 
 
 # ============================================================
@@ -159,13 +210,15 @@ cat("Lambda UR:", lambda_UR)
 boxcox_UR <- BoxCox(outliers_UR, lambda_UR)
 ggtsdisplay(boxcox_UR, main = "UR - Tras BoxCox")
 
-# --- ESTACIONALIDAD ---
-diff_boxcox_UR <- diff(boxcox_UR, lag = 1)
-ggtsdisplay(diff_boxcox_UR, main = "UR - Diferenciada (lag=1)")
+# --- TENDENCIA ---
+tendencia_UR <- decompose(boxcox_UR, type = "additive")$trend
+tend_boxcox_UR <- na.omit(boxcox_UR - tendencia_UR)
+# diff_boxcox_UR <- diff(boxcox_UR)
+ggtsdisplay(tend_boxcox_UR, main = "UR - Diferenciada (lag=1)")
 
-# --- DESCOMPOSICIÓN ---
-decomp_UR <- decompose(diff_boxcox_UR, type = "additive")
-plot(decomp_UR, col = "blue")
+# --- ESTACIONALIDAD ---
+est_tend_boxcox_UR <- diff(tend_boxcox_UR, lag = 2)
+comprobacion_tratamiento(est_tend_boxcox_UR, "UR") # Esta ok
 
 
 # ============================================================
@@ -181,65 +234,17 @@ cat("Lambda SMI:", lambda_SMI)
 boxcox_SMI <- BoxCox(outliers_SMI, lambda_SMI)
 ggtsdisplay(boxcox_SMI, main = "SMI - Tras BoxCox")
 
+# --- Tendencia ---
+tendencia_SMI <- decompose(boxcox_SMI, type = "additive")$trend
+tend_boxcox_SMI <- na.omit(boxcox_SMI - tendencia_SMI)
+
+ggtsdisplay(tend_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
+
 # --- ESTACIONALIDAD ---
-diff_boxcox_SMI <- diff(boxcox_SMI, lag = 1)
+diff_boxcox_SMI <- diff(boxcox_SMI, differences = 2)
 ggtsdisplay(diff_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
 
-# --- DESCOMPOSICIÓN ---
-decomp_SMI <- decompose(diff_boxcox_SMI, type = "additive")
-plot(decomp_SMI, col = "blue")
-
-
-# ==========================================
-# Función de comprobación de estacionariedad
-# ==========================================
-
-comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
-  library(tseries)
-  library(stats)
-  
-  cat("==========================================\n")
-  cat("Resultados para:", nombre_serie, "\n")
-  cat("==========================================\n")
-  
-  # ADF Test
-  adf <- adf.test(serie)
-  cat("ADF test p-value:", round(adf$p.value, 4), "\n")
-  if (adf$p.value < 0.05) {
-    cat(" → Serie estacionaria según ADF ✅\n")
-  } else {
-    cat(" → Serie NO estacionaria según ADF ❌\n")
-  }
-  
-  # KPSS Test
-  kpss <- kpss.test(serie, null = "Level")
-  cat("KPSS test p-value:", round(kpss$p.value, 4), "\n")
-  if (kpss$p.value > 0.05) {
-    cat(" → Serie estacionaria según KPSS ✅\n")
-  } else {
-    cat(" → Serie NO estacionaria según KPSS ❌\n")
-  }
-  
-  # Ljung-Box Test (ruido blanco)
-  ljung <- Box.test(serie, lag = 10, type = "Ljung-Box")
-  cat("Ljung-Box test p-value:", round(ljung$p.value, 4), "\n")
-  if (ljung$p.value > 0.05) {
-    cat(" → Residuos sin autocorrelación (ruido blanco) ✅\n")
-  } else {
-    cat(" → Residuos autocorrelacionados ❌\n")
-  }
-  
-  cat("\n")
-}
-
-# ==========================================
-# Aplicar a todas las series
-# ==========================================
-
-comprobacion_tratamiento(diff_boxcox_GDP, "GDP")
-comprobacion_tratamiento(diff_boxcox_MS, "MS")
-comprobacion_tratamiento(diff_boxcox_SMI, "SMI")
-comprobacion_tratamiento(diff_boxcox_UR, "UR")
+comprobacion_tratamiento(diff_boxcox_SMI, "SMI") # Esta ok
 
 
 
