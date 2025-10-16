@@ -105,94 +105,6 @@ par(mfrow=c(1,1))
 # 5. Control de varianza, estacionalidad y tendencia
 # ============================
 
-# ============================================================
-# GDP
-# ============================================================
-
-# --- VARIANZA ---
-ggtsdisplay(outliers_GDP, main = "GDP - Serie original")
-
-lambda_GDP <- BoxCox.lambda(outliers_GDP)
-cat("Lambda GDP:", lambda_GDP)
-
-boxcox_GDP <- BoxCox(outliers_GDP, lambda_GDP)
-ggtsdisplay(boxcox_GDP, main = "GDP - Tras BoxCox")
-
-# --- ESTACIONALIDAD ---
-diff_boxcox_GDP <- diff(boxcox_GDP, lag = 1)
-ggtsdisplay(diff_boxcox_GDP, main = "GDP - Doble diferencia con estacionalidad")
-
-# --- DESCOMPOSICIÓN ---
-decomp_GDP <- decompose(diff_boxcox_GDP, type = "additive")
-plot(decomp_GDP, col = "blue")
-
-
-# ============================================================
-# MS
-# ============================================================
-
-# --- VARIANZA ---
-ggtsdisplay(outliers_MS, main = "MS - Serie original")
-
-lambda_MS <- BoxCox.lambda(outliers_MS)
-cat("Lambda MS:", lambda_MS)
-
-boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
-ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
-
-# --- ESTACIONALIDAD ---
-diff_boxcox_MS <- diff(diff(diff(boxcox_MS), lag = 4))
-ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
-
-# --- DESCOMPOSICIÓN ---
-decomp_MS <- decompose(diff_boxcox_MS, type = "additive")
-plot(decomp_MS, col = "blue")
-
-
-# ============================================================
-# UR
-# ============================================================
-
-# --- VARIANZA ---
-ggtsdisplay(outliers_UR, main = "UR - Serie original")
-
-lambda_UR <- BoxCox.lambda(outliers_UR)
-cat("Lambda UR:", lambda_UR)
-
-boxcox_UR <- BoxCox(outliers_UR, lambda_UR)
-ggtsdisplay(boxcox_UR, main = "UR - Tras BoxCox")
-
-# --- ESTACIONALIDAD ---
-diff_boxcox_UR <- diff(diff(boxcox_UR), lag = 2)
-ggtsdisplay(diff_boxcox_UR, main = "UR - Diferenciada (lag=1)")
-
-# --- DESCOMPOSICIÓN ---
-decomp_UR <- decompose(diff_boxcox_UR, type = "additive")
-plot(decomp_UR, col = "blue")
-
-
-# ============================================================
-# SMI
-# ============================================================
-
-# --- VARIANZA ---
-ggtsdisplay(outliers_SMI, main = "SMI - Serie original")
-
-lambda_SMI <- BoxCox.lambda(outliers_SMI)
-cat("Lambda SMI:", lambda_SMI)
-
-boxcox_SMI <- BoxCox(outliers_SMI, lambda_SMI)
-ggtsdisplay(boxcox_SMI, main = "SMI - Tras BoxCox")
-
-# --- ESTACIONALIDAD ---
-diff_boxcox_SMI <- diff(boxcox_SMI, lag = 1)
-ggtsdisplay(diff_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
-
-# --- DESCOMPOSICIÓN ---
-decomp_SMI <- decompose(diff_boxcox_SMI, type = "additive")
-plot(decomp_SMI, col = "blue")
-
-
 # ==========================================
 # Función de comprobación de estacionariedad
 # ==========================================
@@ -200,7 +112,7 @@ plot(decomp_SMI, col = "blue")
 comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
   
   cat("Resultados para:", nombre_serie)
-
+  
   # ADF Test
   adf <- adf.test(serie)
   cat("ADF test p-value:", round(adf$p.value, 4))
@@ -231,14 +143,108 @@ comprobacion_tratamiento <- function(serie, nombre_serie = "Serie") {
   cat("\n")
 }
 
-# ==========================================
-# Aplicar a todas las series
-# ==========================================
+# ============================================================
+# GDP
+# ============================================================
+# GDP_BASE <- outliers_GDP
+#outliers_GDP <- window(GDP_BASE, start = c(2010, 1))
 
-comprobacion_tratamiento(diff_boxcox_GDP, "GDP") #ADF no me da por mucho, 0.3707
+# --- VARIANZA ---
+ggtsdisplay(outliers_GDP, main = "GDP - Serie original")
+
+lambda_GDP <- BoxCox.lambda(outliers_GDP)
+cat("Lambda GDP:", lambda_GDP)
+
+boxcox_GDP <- BoxCox(outliers_GDP, lambda_GDP)
+ggtsdisplay(boxcox_GDP, main = "GDP - Tras BoxCox")
+
+# # --- TENDENCIA ---
+# diff_boxcox_GDP <- diff(boxcox_GDP)
+# ggtsdisplay(diff_boxcox_GDP, main = "GDP - Doble diferencia con estacionalidad")
+# comprobacion_tratamiento(diff_boxcox_GDP, "GDP")
+
+
+# TENDENCIA DECOMPOSE
+tendencia_GDP <- decompose(boxcox_GDP, type = "additive")$trend
+tend_boxcox_GDP <- na.omit(boxcox_GDP-tendencia_GDP)
+ggtsdisplay(tend_boxcox_GDP)
+
+# ESTACIONALIDAD
+est_tend_boxcox_GDP <- diff(tend_boxcox_GDP, lag = 3)
+ggtsdisplay(est_tend_boxcox_GDP)
+
+# Estacionaria?
+comprobacion_tratamiento(est_tend_boxcox_GDP, "GDP") #Esta ok
+
+# ============================================================
+# MS
+# ============================================================
+
+# --- VARIANZA ---
+ggtsdisplay(outliers_MS, main = "MS - Serie original")
+
+lambda_MS <- BoxCox.lambda(outliers_MS)
+cat("Lambda MS:", lambda_MS)
+
+boxcox_MS <- BoxCox(outliers_MS, lambda_MS)
+ggtsdisplay(boxcox_MS, main = "MS - Tras BoxCox")
+
+# --- ESTACIONALIDAD ---
+diff_boxcox_MS <- diff(diff(diff(boxcox_MS)), lag = 4)
+ggtsdisplay(diff_boxcox_MS, main = "MS - Diferenciada (lag=1)")
+
+
 comprobacion_tratamiento(diff_boxcox_MS, "MS") #Esta ok
-comprobacion_tratamiento(diff_boxcox_UR, "UR") # ADF no me da por bastante, 0.1443
-comprobacion_tratamiento(diff_boxcox_SMI, "SMI") # Esta ok aunque se pasa un poco en ADF 0.089
+
+
+# ============================================================
+# UR
+# ============================================================
+
+# --- VARIANZA ---
+ggtsdisplay(outliers_UR, main = "UR - Serie original")
+
+lambda_UR <- BoxCox.lambda(outliers_UR)
+cat("Lambda UR:", lambda_UR)
+
+boxcox_UR <- BoxCox(outliers_UR, lambda_UR)
+ggtsdisplay(boxcox_UR, main = "UR - Tras BoxCox")
+
+# --- TENDENCIA ---
+tendencia_UR <- decompose(boxcox_UR, type = "additive")$trend
+tend_boxcox_UR <- na.omit(boxcox_UR - tendencia_UR)
+# diff_boxcox_UR <- diff(boxcox_UR)
+ggtsdisplay(tend_boxcox_UR, main = "UR - Diferenciada (lag=1)")
+
+# --- ESTACIONALIDAD ---
+est_tend_boxcox_UR <- diff(tend_boxcox_UR, lag = 2)
+comprobacion_tratamiento(est_tend_boxcox_UR, "UR") # Esta ok
+
+
+# ============================================================
+# SMI
+# ============================================================
+
+# --- VARIANZA ---
+ggtsdisplay(outliers_SMI, main = "SMI - Serie original")
+
+lambda_SMI <- BoxCox.lambda(outliers_SMI)
+cat("Lambda SMI:", lambda_SMI)
+
+boxcox_SMI <- BoxCox(outliers_SMI, lambda_SMI)
+ggtsdisplay(boxcox_SMI, main = "SMI - Tras BoxCox")
+
+# --- Tendencia ---
+tendencia_SMI <- decompose(boxcox_SMI, type = "additive")$trend
+tend_boxcox_SMI <- na.omit(boxcox_SMI - tendencia_SMI)
+
+ggtsdisplay(tend_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
+
+# --- ESTACIONALIDAD ---
+diff_boxcox_SMI <- diff(boxcox_SMI, differences = 2)
+ggtsdisplay(diff_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
+
+comprobacion_tratamiento(diff_boxcox_SMI, "SMI") # Esta ok
 
 
 
