@@ -14,66 +14,136 @@ if (!require(lubridate)){
 } else {
   library(lubridate)
 }
+#XML2
+if (!require(xml2)){
+  install.packages("xml2")
+  library(xml2)
+} else {
+  library(xml2)
+}
+#RVEST
+if (!require(rvest)){
+  install.packages("rvest")
+  library(rvest)
+} else {
+  library(rvest)
+}
+#STRINGR
+if (!require(stringr)){
+  install.packages("stringr")
+  library(stringr)
+} else {
+  library(stringr)
+}
+#FORECAST
+if (!require(forecast)){
+  install.packages("forecast")
+  library(forecast)
+} else {
+  library(forecast)
+}
+#GGPLOT2
+if (!require(ggplot2)){
+  install.packages("ggplot2")
+  library(ggplot2)
+} else {
+  library(ggplot2)
+}
 
 ##### IMPORTACIÓN DE DATOS #####################################################
-pib_nominal = read.csv(file = "Datos/PIB_NOMINAL_ABS.csv")
-pib_real = read.csv(file = "Datos/PIB_REAL_ABS.csv")
-consumo = read.csv(file = "Datos/CONSUMO_REL.csv")
-inversion = read.csv(file = "Datos/INVERSION_BRUTA_ABS.csv")
-gasto = read.csv(file = "Datos/GASTO_PUBLICO_ABS.csv")
-exportaciones = read.csv(file = "Datos/EXPORTACIONES_ABS.csv")
-importaciones = read.csv(file = "Datos/IMPORTACIONES_ABS.csv")
-export_netas = read.csv(file = "Datos/EXPORTACIONES_NETAS_ABS.csv")
-EUR_USD = read.csv("Datos/EUS_USD.csv")
+#TAMAÑO DE LA ECONOMÍA
+pib_nominal = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=NGDPSAXDCUSQ&scale=left&cosd=1950-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-14&revision_date=2025-10-14&nd=1950-01-01")
+pib_real = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=GDPC1&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-14&revision_date=2025-10-14&nd=1947-01-01")
+consumo = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=DPCERE1Q156NBEA&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-17&revision_date=2025-10-17&nd=1947-01-01")
+inversion = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=A006RE1Q156NBEA&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-17&revision_date=2025-10-17&nd=1947-01-01")
+exportaciones = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=B020RE1Q156NBEA&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-17&revision_date=2025-10-17&nd=1947-01-01")
+importaciones = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=B021RE1Q156NBEA&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-17&revision_date=2025-10-17&nd=1947-01-01")
+export_netas = read.csv(file = "https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23ebf3fb&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1320&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=A019RE1Q156NBEA&scale=left&cosd=1947-01-01&coed=2025-04-01&line_color=%230073e6&link_values=false&line_style=solid&mark_type=none&mw=3&lw=3&ost=-99999&oet=99999&mma=0&fml=a&fq=Quarterly&fam=avg&fgst=lin&fgsnd=2020-02-01&line_index=1&transformation=lin&vintage_date=2025-10-17&revision_date=2025-10-17&nd=1947-01-01")
+
+#EUR_USD
+xml = read_xml("https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/usd.xml")
+obs_xml = html_children(html_children(html_children(xml)[[2]])[[2]])
+EUR_USD = data.frame()
+for (i in 1:length(obs_xml)) {
+  ind = as.character(obs_xml[[i]])
+  ind = str_trim(str_remove_all(ind, "Obs|>|<|\"|STATUS|CONF|/|OBS|\\_"))
+  ind = str_trim(str_replace(ind, "=A =F", ""))
+  val = str_split(ind, " ")
+  fecha = str_remove(val[[1]][1], "TIMEPERIOD=")
+  valor = str_remove(val[[1]][2], "VALUE=")
+  instancia = c(fecha, valor)
+  EUR_USD = rbind(EUR_USD, instancia)
+}
 
 ##### PROCESAMIENTO DE DATOS ###################################################
+#TAMAÑO ECONOMÍA
 colnames(pib_nominal) = c("date", "PIB_NOMINAL")
 colnames(pib_real) = c("date", "PIB_REAL")
-crec_pib_nominal = c(NA, diff(pib_nominal$PIB_NOMINAL))/pib_nominal$PIB_NOMINAL*100
-pib_nominal = cbind(pib_nominal, crec_pib_nominal)
-rm(crec_pib_nominal)
-crec_pib_real = c(NA, diff(pib_real$PIB_REAL))/pib_real$PIB_REAL*100
-pib_real = cbind(pib_real, crec_pib_real)
-rm(crec_pib_real)
-
-colnames(inversion) = c("date", "INVERSION")
-colnames(gasto) = c("date", "GASTO")
-colnames(export_netas) = c("date", "EXPORTACIONES_NETAS")
-colnames(exportaciones) = c("date", "EXPORTACIONES")
-colnames(importaciones) = c("date", "IMPORTACIONES")
-crec_inversion = c(NA, diff(inversion$INVERSION))/inversion$INVERSION*100
-crec_gasto = c(NA, diff(gasto$GASTO))/gasto$GASTO*100
-crec_export_netas = c(NA, diff(export_netas$EXPORTACIONES_NETAS))/export_netas$EXPORTACIONES_NETAS*100
-crec_exportaciones = c(NA, diff(exportaciones$EXPORTACIONES))/exportaciones$EXPORTACIONES*100
-crec_importaciones = c(NA, diff(importaciones$IMPORTACIONES))/importaciones$IMPORTACIONES*100
-inversion = cbind(inversion, crec_inversion)
-rm(crec_inversion)
-gasto = cbind(gasto, crec_gasto)
-rm(crec_gasto)
-export_netas = cbind(export_netas, crec_export_netas)
-rm(crec_export_netas)
-exportaciones = cbind(exportaciones, crec_exportaciones)
-rm(crec_exportaciones)
-importaciones = cbind(importaciones, crec_importaciones)
-rm(crec_importaciones)
+colnames(consumo) = c("date", "CONSUMO_REL")
+colnames(inversion) = c("date", "INVERSION_REL")
+colnames(export_netas) = c("date", "EXPORTACIONES_NETAS_REL")
+colnames(exportaciones) = c("date", "EXPORTACIONES_REL")
+colnames(importaciones) = c("date", "IMPORTACIONES_REL")
 
 df = pib_nominal %>%
   inner_join(pib_real, by = c("date")) %>%
+  inner_join(consumo, by = c("date")) %>%
   inner_join(inversion, by = c("date")) %>%
-  inner_join(gasto, by = c("date")) %>%
   inner_join(export_netas, by = c("date")) %>%
   inner_join(exportaciones, by = c("date")) %>%
   inner_join(importaciones, by = c("date"))
 
-# df$PIB_NOMINAL = df$PIB_NOMINAL*10^6
-# df$PIB_REAL = df$PIB_REAL*10^9
-# df$IMPORTACIONES = df$IMPORTACIONES*10^9
-# df$EXPORTACIONES = df$EXPORTACIONES*10^9
-# df$INVERSION = df$INVERSION*10^9
-# df$GASTO = df$GASTO*10^9
-# df$EXPORTACIONES_NETAS = df$EXPORTACIONES_NETAS*10^9
+df$PIB_NOMINAL = df$PIB_NOMINAL*10^6
+df$PIB_REAL = df$PIB_REAL*10^9
+df = df %>% 
+  mutate(CONSUMO_ABS = PIB_REAL * CONSUMO_REL / 100, .before = CONSUMO_REL) %>%
+  mutate(INVERSION_ABS = PIB_REAL * INVERSION_REL / 100, .before = INVERSION_REL) %>%
+  mutate(EXPORTACIONES_ABS = PIB_REAL * EXPORTACIONES_REL / 100, .before = EXPORTACIONES_REL) %>%
+  mutate(IMPORTACIONES_ABS = PIB_REAL * IMPORTACIONES_REL / 100, .before = IMPORTACIONES_REL) %>%
+  mutate(EXPORTACIONES_NETAS_ABS = PIB_REAL * EXPORTACIONES_NETAS_REL / 100, .before = EXPORTACIONES_NETAS_REL) %>%
+  mutate(GASTO_REL = 100 - CONSUMO_REL - INVERSION_REL - EXPORTACIONES_NETAS_REL, .before = EXPORTACIONES_NETAS_ABS) %>%
+  mutate(GASTO_ABS = PIB_REAL * GASTO_REL / 100, .before = GASTO_REL)
 
-tail(df$INVERSION+df$GASTO+df$EXPORTACIONES_NETAS)
-tail(df)
+df = df %>% 
+  mutate(CREC_PIB_NOMINAL = c(NA, diff(PIB_NOMINAL)) / PIB_NOMINAL * 100, .after = PIB_NOMINAL) %>%
+  mutate(CREC_PIB_REAL = c(NA, diff(PIB_REAL)) / PIB_REAL * 100, .after = PIB_REAL) %>%
+  mutate(CREC_CONSUMO = c(NA, diff(CONSUMO_ABS)) / CONSUMO_ABS * 100, .after = CONSUMO_REL) %>%
+  mutate(CREC_INVERSION = c(NA, diff(INVERSION_ABS)) / INVERSION_ABS * 100, .after = INVERSION_REL) %>%
+  mutate(CREC_GASTO = c(NA, diff(GASTO_ABS)) / GASTO_ABS * 100, .after = GASTO_REL) %>%
+  mutate(CREC_EXPORTACIONES = c(NA, diff(EXPORTACIONES_ABS)) / EXPORTACIONES_ABS * 100, .after = EXPORTACIONES_REL) %>%
+  mutate(CREC_IMPORTACIONES = c(NA, diff(IMPORTACIONES_ABS)) / IMPORTACIONES_ABS * 100, .after = IMPORTACIONES_REL) %>%
+  mutate(CREC_EXPORTACIONES_NETAS = c(NA, diff(EXPORTACIONES_NETAS_ABS)) / EXPORTACIONES_NETAS_ABS * 100, .after = EXPORTACIONES_NETAS_REL) 
 
-#REVISAR GASTO pÜBLICO
+colnames(df)[1] = "DATE"
+
+str(df)
+df$DATE = as.Date(df$DATE)
+
+#EUR_USD
+colnames(EUR_USD) = c("date", "EUR_USD")
+EUR_USD$date = as.Date(EUR_USD$date)
+EUR_USD$EUR_USD = as.numeric(EUR_USD$EUR_USD)
+ts = ts(EUR_USD$EUR_USD)
+trend = round(ma(ts, order = 300), 5)
+E_U = EUR_USD %>% mutate(TREND = trend)
+#HAY QUE MIRAR ESTO
+autoplot(ts, ylab = "EUS/USD", xlab = "DATE")
+autoplot(trend, ylab = "EUS/USD", xlab = "DATE")
+
+EUR_USD_TREND = cbind(EUR_USD, trend)
+EUR_USD_TREND$trend = as.numeric(EUR_USD_TREND$trend)
+
+##### VISUALIZACIÓN DE LOS DATOS ###############################################
+#TAMAÑO DE LA ECONOMÍA
+graficos = list()
+for (i in colnames(df)[2:dim(df)[2]]) {
+  grafico = ggplot(df, aes(x = DATE, y = !!ensym(i))) + 
+    geom_line()
+  graficos[[i]] = grafico
+}
+
+graficos$CREC_PIB_NOMINAL
+
+#EUR/USD
+ggplot(EUR_USD_TREND, aes(x = date, y = trend)) +
+  geom_line(color = "red") 
