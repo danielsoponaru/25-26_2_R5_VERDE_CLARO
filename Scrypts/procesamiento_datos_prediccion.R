@@ -290,10 +290,6 @@ tend_boxcox_CPI <- na.omit(boxcox_CPI - tendencia_CPI)
 
 ggtsdisplay(tend_boxcox_CPI, main = "CPI - Diferenciada (lag=1)")
 
-# --- ESTACIONALIDAD ---
-# diff_boxcox_CPI <- diff(boxcox_CPI, differences = 2)
-# ggtsdisplay(diff_boxcox_CPI, main = "CPI - Diferenciada (lag=1)")
-
 comprobacion_tratamiento(tend_boxcox_CPI, "CPI") # Esta ok
 
 
