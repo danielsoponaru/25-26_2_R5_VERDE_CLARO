@@ -1,5 +1,5 @@
 # ==========================================================
-# Análisis de series temporales con las 4 variables del PIB
+# Análisis de series temporales con las 5 variables del PIB
 # ==========================================================
 
 # Librerías necesarias
@@ -12,34 +12,38 @@ library(tseries)
 library(tsoutliers)
 library(visdat)
 library(stats)
-library(ggplot2)
-
-
-#   FALTA POR METER EL XSLX DE IPC, TENER EN CUENTA
+library(lubridate)
 
 # ============================
-# 1. Cargar, preparado de los datos y visualizacion de los datos faltantes
+# 1. Cargar y preparar los datos
 # ============================
 
-df <- read.csv("Datos/pib_exogenas_usa.csv",sep = ";")
+df <- read.csv("Datos/pib_exogenas_usa.csv", sep = ";")
+df1 <- read.csv("Datos/CPI_usa.csv")
 
+# Renombrar columnas y preparar fechas
 colnames(df) <- c("Country","Code","ContinentCode","Year","Month",
                   "GDP","Money_supply","Unemployment_rate","Stock_market_index")
 
-df$Date <- as.Date(paste(df$Year, df$Month, "01", sep="-"))
+df$Date <- as.Date(paste(df$Year, df$Month, "01", sep = "-"))
+df1$DATE <- as.Date(df1$DATE)
 
-df<- df %>%
-  mutate(across(c(GDP, Money_supply, Unemployment_rate, Stock_market_index), 
-                as.numeric)) %>% 
-  select(c(GDP,Money_supply,Unemployment_rate,Stock_market_index,Date,Year, Month))
+# Convertir a numéricas las columnas relevantes
+df <- df %>%
+  mutate(across(c(GDP, Money_supply, Unemployment_rate, Stock_market_index),
+                as.numeric)) %>%
+  select(GDP, Money_supply, Unemployment_rate, Stock_market_index, Date, Year, Month)
 
+df1 <- df1 %>%
+  mutate(CPI = as.numeric(CPI)) %>%
+  arrange(DATE)
+
+# Visualización de datos faltantes
 vis_miss(df)
-
-# Observamos que los datos presentan NAs en GDP ya que presenta datos trimestrales,
-# aparte de los datos por imputar de las variables MS, UR y SMI.
+vis_miss(df1)
 
 # ============================
-# 2. Crear series temporales trimestrales (último dato del trimestre)
+# 2. Crear series trimestrales (último dato del trimestre)
 # ============================
 
 df <- df %>%
@@ -48,7 +52,7 @@ df <- df %>%
 
 df_quarterly <- df %>%
   filter(Month %in% c(3, 6, 9, 12)) %>%
-  filter(Year %in% 2010:2021) %>% #He filtrado desde 2010 hasta 2021 que es donde tenemos los valores faltantes
+  filter(Year %in% 2010:2021) %>%
   group_by(Year, Quarter) %>%
   summarise(
     GDP = first(na.omit(GDP)),
@@ -59,14 +63,29 @@ df_quarterly <- df %>%
   ungroup() %>%
   arrange(Year, Quarter)
 
+# Crear trimestre para CPI (tomar último dato del trimestre)
+df1 <- df1 %>%
+  mutate(Year = year(DATE),
+         Month = month(DATE),
+         Quarter = ceiling(Month / 3)) %>%
+  filter(Year %in% 2010:2021) %>%
+  group_by(Year, Quarter) %>%
+  summarise(CPI = last(CPI)) %>%
+  ungroup()
 
-vis_miss(df_quarterly)
+# Unir CPI al dataset trimestral principal
+df_quarterly <- df_quarterly %>%
+  left_join(df1, by = c("Year", "Quarter"))
 
+# Crear columna Date representando inicio de trimestre
 df_quarterly$Date <- as.Date(paste(df_quarterly$Year, (df_quarterly$Quarter - 1) * 3 + 1, "01", sep = "-"))
 
+# Filtrar rango de fechas útil
 df_quarterly <- df_quarterly %>%
   filter(Date >= as.Date("2010-07-01") & Date <= as.Date("2021-06-30"))
 
+# Verificar estructura
+vis_miss(df_quarterly)
 head(df_quarterly)
 
 # ============================
@@ -80,25 +99,30 @@ GDP_ts <- ts(df_quarterly$GDP, start = c(start_year, start_quarter), frequency =
 MS_ts  <- ts(df_quarterly$MS,  start = c(start_year, start_quarter), frequency = 4)
 UR_ts  <- ts(df_quarterly$UR,  start = c(start_year, start_quarter), frequency = 4)
 SMI_ts <- ts(df_quarterly$SMI, start = c(start_year, start_quarter), frequency = 4)
+CPI_ts <- ts(df_quarterly$CPI, start = c(start_year, start_quarter), frequency = 4)
 
 # ============================
-# 4. Detección y ajuste de outliers (versión moderada)
+# 4. Detección y ajuste de outliers
 # ============================
 
 outliers_GDP <- tsclean(GDP_ts)
 outliers_MS  <- tsclean(MS_ts)
 outliers_UR  <- tsclean(UR_ts)
 outliers_SMI <- tsclean(SMI_ts)
+outliers_CPI <- tsclean(CPI_ts)
 
-par(mfrow=c(2,2))
+# Graficar comparación
+par(mfrow = c(3,2))
 ts.plot(GDP_ts, outliers_GDP, col=c("black","red"), lty=c(1,2),
-        main="GDP: Original vs Ajustada (tsclean)")
+        main="GDP: Original vs Ajustada")
 ts.plot(MS_ts, outliers_MS, col=c("black","red"), lty=c(1,2),
-        main="MS: Original vs Ajustada (tsclean)")
+        main="MS: Original vs Ajustada")
 ts.plot(UR_ts, outliers_UR, col=c("black","red"), lty=c(1,2),
-        main="UR: Original vs Ajustada (tsclean)")
+        main="UR: Original vs Ajustada")
 ts.plot(SMI_ts, outliers_SMI, col=c("black","red"), lty=c(1,2),
-        main="SMI: Original vs Ajustada (tsclean)")
+        main="SMI: Original vs Ajustada")
+ts.plot(CPI_ts, outliers_CPI, col=c("black","red"), lty=c(1,2),
+        main="CPI: Original vs Ajustada")
 par(mfrow=c(1,1))
 
 # ============================
@@ -247,7 +271,123 @@ ggtsdisplay(diff_boxcox_SMI, main = "SMI - Diferenciada (lag=1)")
 comprobacion_tratamiento(diff_boxcox_SMI, "SMI") # Esta ok
 
 
+# ============================================================
+# CPI
+# ============================================================
 
+# --- VARIANZA ---
+ggtsdisplay(outliers_CPI, main = "CPI - Serie original")
+
+lambda_CPI <- BoxCox.lambda(outliers_CPI)
+cat("Lambda CPI:", lambda_CPI)
+
+boxcox_CPI <- BoxCox(outliers_CPI, lambda_CPI)
+ggtsdisplay(boxcox_CPI, main = "CPI - Tras BoxCox")
+
+# --- Tendencia Y Estacionalidad ---
+tendencia_CPI <- decompose(boxcox_CPI, type = "additive")$trend
+tend_boxcox_CPI <- na.omit(boxcox_CPI - tendencia_CPI)
+
+ggtsdisplay(tend_boxcox_CPI, main = "CPI - Diferenciada (lag=1)")
+
+comprobacion_tratamiento(tend_boxcox_CPI, "CPI") # Esta ok
+
+
+# ==========================================================
+# 6. MODELADO ARIMAX MULTIVARIABLE AUTOMÁTICO Y ROBUSTO
+# ==========================================================
+
+# ==========================================================
+# Función auxiliar de métricas seguras
+# ==========================================================
+safe_accuracy <- function(modelo) {
+  acc <- tryCatch({
+    accuracy(modelo)
+  }, error = function(e) {
+    data.frame(ME = NA, RMSE = NA, MAE = NA, MPE = NA, MAPE = NA)
+  })
+  return(acc)
+}
+
+# ==========================================================
+# Función principal: Ajuste ARIMAX con validación
+# ==========================================================
+evaluar_arimax <- function(y, xreg, nombre) {
+  df_temp <- na.omit(cbind(y, xreg))
+  y_clean <- df_temp[, 1]
+  x_clean <- df_temp[, -1, drop = FALSE]
+  
+  cat("\n📈 Ajustando modelo para:", nombre, "\n")
+  
+  modelo <- tryCatch({
+    auto.arima(y_clean,
+               xreg = x_clean,
+               stepwise = FALSE,       # búsqueda completa
+               approximation = FALSE,  # más preciso
+               seasonal = FALSE,       # sin patrón trimestral fuerte
+               allowdrift = TRUE,
+               trace = FALSE)
+  }, error = function(e) {
+    cat("⚠️ Error al ajustar", nombre, ":", e$message, "\n")
+    return(NULL)
+  })
+  
+  if (is.null(modelo)) {
+    return(data.frame(Variable = nombre, AICc = NA, RMSE = NA, MAPE = NA))
+  }
+  
+  # Métricas de rendimiento
+  acc <- safe_accuracy(modelo)
+  
+  cat("✅ Modelo elegido:", capture.output(modelo)[1], "\n")
+  cat("AICc:", round(modelo$aicc, 2), " | MAPE:", round(acc[5], 3), "\n\n")
+  
+  # Devolver resumen
+  return(data.frame(Variable = nombre,
+                    AICc = modelo$aicc,
+                    RMSE = acc[2],
+                    MAPE = acc[5]))
+}
+
+# ==========================================================
+# 3️⃣ Crear matriz de regresores
+# ==========================================================
+regresores <- data.frame(
+  GDP = outliers_GDP,
+  MS  = outliers_MS,
+  UR  = outliers_UR,
+  SMI = outliers_SMI,
+  CPI = outliers_CPI
+)
+
+# ==========================================================
+# 4️⃣ Ajustar modelos ARIMAX para cada variable
+# ==========================================================
+resultados <- list(
+  evaluar_arimax(regresores$GDP, regresores %>% select(MS, UR, SMI, CPI), "GDP"),
+  evaluar_arimax(regresores$MS,  regresores %>% select(GDP, UR, SMI, CPI), "MS"),
+  evaluar_arimax(regresores$UR,  regresores %>% select(GDP, MS, SMI, CPI), "UR"),
+  evaluar_arimax(regresores$SMI, regresores %>% select(GDP, MS, UR, CPI), "SMI"),
+  evaluar_arimax(regresores$CPI, regresores %>% select(GDP, MS, UR, SMI), "CPI")
+)
+
+# ==========================================================
+# 5️⃣ Generar tabla resumen comparativa
+# ==========================================================
+tabla_resultados <- do.call(rbind, resultados) %>%
+  arrange(AICc)
+
+cat("\n======================================\n")
+cat("🏁 RESULTADOS FINALES ARIMAX\n")
+cat("======================================\n")
+print(tabla_resultados)
+
+# ==========================================================
+# 6️⃣ (Opcional) Visualización de residuos
+# ==========================================================
+# Puedes inspeccionar el modelo del PIB, por ejemplo:
+# fit_GDP <- auto.arima(outliers_GDP, xreg = cbind(outliers_MS, outliers_UR, outliers_SMI, outliers_CPI))
+# checkresiduals(fit_GDP)
 
 
 
