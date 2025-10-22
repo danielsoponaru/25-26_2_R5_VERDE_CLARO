@@ -135,15 +135,77 @@ EUR_USD_TREND$trend = as.numeric(EUR_USD_TREND$trend)
 
 ##### VISUALIZACIÓN DE LOS DATOS ###############################################
 #TAMAÑO DE LA ECONOMÍA
+colnames(df) = c("FECHA", 
+                 "PIB_NOMINAL_ABSOLUTO",
+                 "INDICE_DE_CRECIMIENTO_DEL_PIB_NOMINAL",
+                 "PIB_REAL_ABSOLUTO",
+                 "INDICE_DE_CRECIMIENTO_DEL_PIB_REAL",
+                 "CONSUMO_ABSOLUTO",
+                 "PORCENTAJE_DE_CONSUMO_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DEL_CONSUMO",
+                 "INVERSION_ABSOLUTA",
+                 "PORCENTAJE_DE_INVERSION_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DE_LA_INVERSION",
+                 "GASTO_PUBLICO_ABSOLUTO",
+                 "PORCENTAJE_DE_GASTO_PUBLICO_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DEL_GASTO_PUBLICO",
+                 "EXPORTACIONES_NETAS_ABSOLUTA",
+                 "PORCENTAJE_DE_EXPORTACIONES_NETAS_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DE_LAS_EXPORTACIONES_NETAS",
+                 "EXPORTACIONES_ABSOLUTA",
+                 "PORCENTAJE_DE_EXPORTACIONES_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DE_LAS_EXPORTACIONES",
+                 "IMPORTACIONES_ABSOLUTA",
+                 "PORCENTAJE_DE_IMPORTACIONES_DEL_PIB",
+                 "INDICE_DE_CRECIMIENTO_DE_LAS_IMPORTACIONES")
 graficos = list()
 for (i in colnames(df)[2:dim(df)[2]]) {
-  grafico = ggplot(df, aes(x = DATE, y = !!ensym(i))) + 
-    geom_line()
+  grafico = ggplot(df, aes(x = FECHA, y = !!ensym(i))) + 
+    geom_line(color = "#3C3B6E", size = 0.75) +
+    labs(
+      title = paste0("Evolución de ", str_replace_all(str_to_lower(i), "_", " ")),
+      subtitle = "Fuente: Banco Federal de Estados Unidos",
+      x = "Año",
+      y = i
+    ) + 
+    theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", size = 16),
+      plot.subtitle = element_text(size = 12, color = "gray40"),
+      axis.title = element_text(face = "bold", color = "black", size = 10),
+      axis.text = element_text(color = "black", face = "bold"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "#B0B2D3", color = NA),
+      plot.background = element_rect(fill = "#B0B2D3", color = NA)
+    )
   graficos[[i]] = grafico
 }
 
-graficos$CREC_PIB_NOMINAL
+for (j in seq_along(graficos)) {
+  plot_ = graficos[[j]]
+  name_plot = names(graficos)[j]
+  ggsave(filename = paste0("Graficos/", name_plot, ".jpg"), plot = plot_)
+}
 
 #EUR/USD
-ggplot(EUR_USD_TREND, aes(x = date, y = trend)) +
-  geom_line(color = "red") 
+EUR_USD_plot = ggplot(EUR_USD_TREND, aes(x = date, y = EUR_USD)) +
+  geom_line(color = "black") +
+  geom_line(aes(y = trend), color = "red", size = 1.3) +
+  labs(
+    title = paste0("Evolución de EUR/USD"),
+    subtitle = "Fuente: Banco Central Europeo",
+    x = "Año",
+    y = "EUR/USD"
+  ) + 
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12, color = "gray40"),
+    axis.title = element_text(face = "bold", color = "black", size = 10),
+    axis.text = element_text(color = "black", face = "bold"),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "#B0B2D3", color = NA),
+    plot.background = element_rect(fill = "#B0B2D3", color = NA)
+  )
+
+ggsave(filename = "Graficos/EUR_USD.jpg", plot = EUR_USD_plot)
