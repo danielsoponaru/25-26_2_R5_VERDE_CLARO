@@ -17,7 +17,7 @@ usa <- datos %>%
   ) %>%
   mutate(Año = as.numeric(Año))
 
-ggplot(usa, aes(x = Año, y = Esperanza_de_vida)) +
+grafico1 = ggplot(usa, aes(x = Año, y = Esperanza_de_vida)) +
   geom_point(color = "#3C3B6E", size = 2) +
   labs(
     title = "Esperanza de vida al nacer en Estados Unidos (1960–2023)",
@@ -36,6 +36,7 @@ ggplot(usa, aes(x = Año, y = Esperanza_de_vida)) +
     panel.background = element_rect(fill = "#B0B2D3", color = NA)
   )
 
+ggsave(filename = "Graficos/ESPERANZA_VIDA.jpg", grafico1)
 
 
 ######
@@ -56,12 +57,12 @@ datos <- datos %>%
   )
 datos$Fecha <- as.Date(datos$Fecha)
 
-ggplot(datos, aes(x = Fecha, y = Gasto_per_capita)) +
+grafico2 = ggplot(datos, aes(x = Fecha, y = Gasto_per_capita)) +
   geom_area(fill = "#3C3B6E", alpha = 0.6) +
   geom_line(color = "#3C3B6E", size = 1) +
   labs(
     title = "Gasto en Salud per cápita - Estados Unidos",
-    subtitle = "Fuente: Banco Mundial de Datos",
+    subtitle = "Fuente: Banco Federal de Estados Unidos",
     x = "",
     y = "Dólares estadounidenses"
   ) +
@@ -76,3 +77,4 @@ ggplot(datos, aes(x = Fecha, y = Gasto_per_capita)) +
     panel.background = element_rect(fill = "#B0B2D3", color = NA)
   )
 
+ggsave(filename = "Graficos/GASTOS_SALUD_PP.jpg", grafico2)
