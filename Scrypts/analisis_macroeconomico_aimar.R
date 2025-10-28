@@ -170,7 +170,7 @@ for (i in colnames(df)[2:dim(df)[2]]) {
     ) + 
     theme_minimal(base_size = 14) +
     theme(
-      plot.title = element_text(face = "bold", size = 16),
+      plot.title = element_text(face = "bold", size = 10),
       plot.subtitle = element_text(size = 12, color = "gray40"),
       axis.title = element_text(face = "bold", color = "black", size = 10),
       axis.text = element_text(color = "black", face = "bold"),
@@ -180,7 +180,7 @@ for (i in colnames(df)[2:dim(df)[2]]) {
     )
   graficos[[i]] = grafico
 }
-
+# graficos[[15]]
 for (j in seq_along(graficos)) {
   plot_ = graficos[[j]]
   name_plot = names(graficos)[j]
