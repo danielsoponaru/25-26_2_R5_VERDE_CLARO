@@ -58,7 +58,7 @@ usa_data$Value <- as.numeric(usa_data$Value)
 inflacion = ggplot(usa_data, aes(x = Year, y = Value)) +
   geom_line(color = "#3C3B6E", size = 1) +
   geom_point(color = "#3C3B6E") +
-  labs(title = "Tasa de inflación (% anual) de Estados Unidos",
+  labs(title = "Indices de precios al consumidor",
        subtitle = "Fuente: Banco Mundial de Datos",
        x = "Año",
        y = "Inflación (%)") + 
