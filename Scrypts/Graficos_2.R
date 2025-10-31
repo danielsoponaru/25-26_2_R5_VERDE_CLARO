@@ -1,8 +1,3 @@
-library(ggplot2)
-library(plotly)
-library(dplyr)
-library(readr)
-
 #################TASA LABORAL MASCULINO
 datos <- read_csv("Datos/LNS11300001.csv")
 

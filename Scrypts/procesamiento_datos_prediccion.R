@@ -1,20 +1,5 @@
 # Series temporales - PIB y variables exógenas
 
-# Librerías
-library(dplyr)
-library(imputeTS)
-library(forecast)
-library(tseries)
-library(tsoutliers)
-library(visdat)
-library(stats)
-library(lubridate)
-library(vars)
-library(forecast)
-library(ggplot2)
-library(vars)
-library(gridExtra)
-
 # Cargar datos
 
 df <- read.csv("Datos/pib_exogenas_usa.csv", sep = ";")

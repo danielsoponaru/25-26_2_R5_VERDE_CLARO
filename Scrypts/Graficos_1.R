@@ -1,5 +1,3 @@
-# Cargar librerías
-library(ggplot2)
 
 # Leer el archivo CSV
 datos <- read.csv("Datos/DCOILWTICO (1).csv")
@@ -34,10 +32,6 @@ ggsave(filename = "Graficos/PRECIO_PETROLEO.jpg", grafico)
 
 
 ########################################################
-# Cargar librerías necesarias
-library(readr)
-library(dplyr)
-library(ggplot2)
 
 # Leer el CSV
 data <- read_csv("Datos/API_FP.CPI.TOTL.ZG_DS2_es_csv_v2_115681[1].csv", skip = 4)

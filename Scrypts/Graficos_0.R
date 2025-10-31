@@ -1,7 +1,3 @@
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(readr)
 
 #ESPERANZA DE VIDA AL NACER EN ESTADOS UNIDOS (1960-2023)
 
