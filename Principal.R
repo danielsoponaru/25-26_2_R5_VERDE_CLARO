@@ -1,0 +1,51 @@
+# Librerías
+if (!require("dplyr")) install.packages("dplyr")
+library(dplyr)
+if (!require("imputeTS")) install.packages("imputeTS")
+library(imputeTS)
+if (!require("forecast")) install.packages("forecast")
+library(forecast)
+if (!require("tseries")) install.packages("tseries")
+library(tseries)
+if (!require("tsoutliers")) install.packages("tsoutliers")
+library(tsoutliers)
+if (!require("visdat")) install.packages("visdat")
+library(visdat)
+if (!require("stats")) install.packages("stats")
+library(stats)
+if (!require("lubridate")) install.packages("lubridate")
+library(lubridate)
+if (!require("vars")) install.packages("vars")
+library(vars)
+if (!require("ggplot2")) install.packages("ggplot2")
+library(ggplot2)
+if (!require("gridExtra")) install.packages("gridExtra")
+library(gridExtra)
+if (!require("XML")) install.packages("XML")
+library(XML)
+if (!require("rvest")) install.packages("rvest")
+library(rvest)
+if (!require("stringr")) install.packages("stringr")
+library(stringr)
+if (!require("tidyr")) install.packages("tidyr")
+library(tidyr)
+
+# Código
+rm(list = ls())
+source("Scrypts/procesamiento_datos_prediccion.R")
+
+rm(list = ls())
+source("Scrypts/Analisis_macroeconomico.R")
+
+rm(list = ls())
+source("Scrypts/Graficos_0.R")
+
+rm(list = ls())
+source("Scrypts/Graficos_1.R")
+
+rm(list = ls())
+source("Scrypts/Graficos_2.R")
+
+rm(list = ls())
+source("Scrypts/Tasas_de_interes.R")
+
