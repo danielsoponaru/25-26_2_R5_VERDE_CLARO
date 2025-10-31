@@ -34,15 +34,16 @@ ggsave(filename = "Graficos/PRECIO_PETROLEO.jpg", grafico)
 ########################################################
 
 # Leer el CSV
-data <- read_csv("Datos/API_FP.CPI.TOTL.ZG_DS2_es_csv_v2_115681[1].csv", skip = 4)
+data <- read.csv("Datos/API_FP.CPI.TOTL.ZG_DS2_es_csv_v2_115681[1].csv", skip = 4)
 
 # Filtrar solo Estados Unidos
 usa_data <- data %>%
-  filter(`Country Name` == "Estados Unidos") %>%
-  select(`Country Name`, matches("^[0-9]{4}$")) %>%   # columnas de años
-  tidyr::pivot_longer(cols = -`Country Name`,
+  dplyr::filter(Country.Name == "Estados Unidos") %>%
+  dplyr::select(Country.Name, matches("^X[0-9]{4}$")) %>%
+  tidyr::pivot_longer(cols = -Country.Name,
                       names_to = "Year",
-                      values_to = "Value")
+                      values_to = "Value") %>%
+  mutate(Year = as.numeric(gsub("X", "", Year)))
 
 # Convertir columnas a formato correcto
 usa_data$Year <- as.numeric(usa_data$Year)

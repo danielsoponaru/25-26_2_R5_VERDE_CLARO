@@ -1,17 +1,17 @@
 
 #ESPERANZA DE VIDA AL NACER EN ESTADOS UNIDOS (1960-2023)
 
-datos <- read_csv("Datos/API_SP.DYN.LE00.IN_DS2_es_csv_v2_1113163.csv", skip = 4)
+datos <- read.csv("Datos/API_SP.DYN.LE00.IN_DS2_es_csv_v2_1113163.csv", skip = 4)
 
 
 usa <- datos %>%
-  filter(`Country Name` == "Estados Unidos") %>%
+  filter(Country.Name == "Estados Unidos") %>%
   pivot_longer(
-    cols = `1960`:`2023`,
+    cols = "X1960":"X2023",
     names_to = "Año",
     values_to = "Esperanza_de_vida"
   ) %>%
-  mutate(Año = as.numeric(Año))
+  mutate(Año = as.numeric(str_remove(Año, "X")))
 
 grafico1 = ggplot(usa, aes(x = Año, y = Esperanza_de_vida)) +
   geom_point(color = "#3C3B6E", size = 2) +
@@ -37,14 +37,9 @@ ggsave(filename = "Graficos/ESPERANZA_VIDA.jpg", grafico1)
 
 ######
 
-
-library(readr)
-library(ggplot2)
-library(dplyr)
-
 #GASTO EN SALUD PER CÁPITA - ESTADOS UNIDOS)
 
-datos <- read_csv("Datos/HLTHSCPCHCSA.csv")
+datos <- read.csv("Datos/HLTHSCPCHCSA.csv")
 
 datos <- datos %>%
   rename(

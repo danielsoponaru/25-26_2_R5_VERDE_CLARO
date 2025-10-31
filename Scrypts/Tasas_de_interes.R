@@ -1,5 +1,5 @@
 # Cargar los datos
-datos <- read_csv("Datos/datos_tasas_interes.csv")
+datos <- read.csv("Datos/datos_tasas_interes.csv")
 
 # Limpiar los datos
 datos <- datos %>%

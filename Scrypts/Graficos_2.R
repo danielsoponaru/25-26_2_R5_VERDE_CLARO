@@ -1,9 +1,10 @@
 #################TASA LABORAL MASCULINO
-datos <- read_csv("Datos/LNS11300001.csv")
+datos <- read.csv("Datos/LNS11300001.csv")
 
 # Preparar los datos: crear columna Year y filtrar desde 1990
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -35,10 +36,11 @@ p_interactivo
 ggsave(filename = "Graficos/TASA_PARTICIPACION.jpg", p)
 
 #################TASA LABORAL MASCULINO
-datos <- read_csv("Datos/LNS11300002.csv")
+datos <- read.csv("Datos/LNS11300002.csv")
 
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -69,9 +71,10 @@ p_interactivo
 ggsave(filename = "Graficos/TASA_PARTICIPACION_FEMENINA.jpg", p)
 
 #######################TASA DESEMPLEO
-datos <- read_csv("Datos/UNRATE.csv")
+datos <- read.csv("Datos/UNRATE.csv")
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -105,11 +108,12 @@ ggsave(filename = "Graficos/TASA_DESEMPLEO.jpg", p)
 
 ##################TASA DE PARTICIPACION LABORAR 16-19
 
-datos <- read_csv("Datos/LNS11300012.csv")
+datos <- read.csv("Datos/LNS11300012.csv")
 
 # Preparar los datos: crear columna Year y filtrar desde 1990
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -143,10 +147,11 @@ ggsave(filename = "Graficos/TASA_PARTICIPACION_16_19.jpg", p)
 
 ##################TASA DE PARTICIPACION LABORAR 20-24
 
-datos <- read_csv("Datos/LNS11300036 (1).csv")
+datos <- read.csv("Datos/LNS11300036 (1).csv")
 
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -180,10 +185,11 @@ p_interactivo
 ggsave(filename = "Graficos/TASA_PARTICIPACION_20_24.jpg", p)
 
 ##################TASA DE PARTICIPACION LABORAR 25-54
-datos <- read_csv("Datos/LNS11300060.csv")
+datos <- read.csv("Datos/LNS11300060.csv")
 
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
@@ -215,9 +221,10 @@ ggsave(filename = "Graficos/TASA_PARTICIPACION_25_54.jpg", p)
 
 ##################TASA DE PARTICIPACION LABORAR +55
 
-datos <- read_csv("Datos/LNS11324230.csv")
+datos <- read.csv("Datos/LNS11324230.csv")
 datos <- datos %>%
   mutate(
+    observation_date = as.Date(observation_date),
     Year = as.numeric(format(observation_date, "%Y"))
   ) %>%
   filter(Year >= 1990)
